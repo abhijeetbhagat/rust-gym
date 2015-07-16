@@ -1,4 +1,4 @@
-mod Singleton{
+mod singleton{
     static mut instance : Singleton = Singleton {x : 5};
     
     pub struct Singleton{
@@ -6,10 +6,7 @@ mod Singleton{
     }
 
     impl Singleton{
-        fn new()->Singleton{
-            Singleton {x : 34}
-        }
-
+        
         pub fn get()->&'static mut Singleton{
             unsafe{
                 &mut instance
@@ -28,9 +25,9 @@ mod Singleton{
 
 
 fn main(){
-    let s = Singleton::Singleton::get();
+    let s = singleton::Singleton::get();
     assert_eq!(s.get_x(), 5);
     s.set_x(2);
-    let s2 = Singleton::Singleton::get();
+    let s2 = singleton::Singleton::get();
     assert_eq!(s2.get_x(), 2);
 }
