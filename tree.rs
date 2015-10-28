@@ -12,6 +12,17 @@ impl Node{
 
 fn preorder(n : &Option<Box<Node>>){
     let _n = &*n.as_ref().unwrap();
+    println!("{}", _n.d);
+    if _n.l.is_some(){
+        preorder(&_n.l);
+    }
+    if _n.r.is_some(){
+        preorder(&_n.r);
+    } 
+}
+
+fn postorder(n : &Option<Box<Node>>){
+    let _n = &*n.as_ref().unwrap();
     if _n.l.is_some(){
         preorder(&_n.l);
     }
@@ -36,12 +47,13 @@ fn inorder(n : &Option<Box<Node>>){
 }
 
 fn main(){
-    let mut n = Node::new(0);
-    let mut nl = Node::new(1);
+    let mut n = Node::new(1);
+    let mut nl = Node::new(0);
     let mut nr = Node::new(2);
     n.l = Some(Box::new(nl)); 
     n.r = Some(Box::new(nr));
     let r = Some(Box::new(n));
+    postorder(&r);
     inorder(&r);
     preorder(&r);
 }
