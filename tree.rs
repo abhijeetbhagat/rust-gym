@@ -1,3 +1,5 @@
+use std::rc::Rc;
+#[derive(Clone)]
 struct Node{
     d : i32,
     l : Option<Box<Node>>,
@@ -46,6 +48,37 @@ fn inorder(n : &Option<Box<Node>>){
     }
 }
 
+fn inorder_no_recurse(n : &Option<Box<Node>>){
+    //store vec of references which are owned by the vec.
+    //even if the vec is destroyed, only the containing references
+    //will be destroyed as a result not the objects they are
+    //pointing to
+    let mut stack : Vec<&Node>= Vec::new();
+    let mut a : &Node = n.as_ref().unwrap();
+    stack.push(a);
+    loop{
+        while !stack.is_empty(){
+            if a.l.is_some(){
+                stack.push(a.l.as_ref().unwrap());
+                a = a.l.as_ref().unwrap();
+                continue;
+            }
+            a = stack.pop().unwrap();
+            println!("{}", a.d);
+            if a.r.is_some(){
+                stack.push(a.r.as_ref().unwrap());
+                a = a.r.as_ref().unwrap();
+            }
+        }
+        if a.r.is_some(){
+            stack.push(a.r.as_ref().unwrap());
+        }
+        else{
+            break;
+        }
+    }
+}
+
 fn main(){
     let mut n = Node::new(1);
     let mut nl = Node::new(0);
@@ -53,7 +86,8 @@ fn main(){
     n.l = Some(Box::new(nl)); 
     n.r = Some(Box::new(nr));
     let r = Some(Box::new(n));
-    postorder(&r);
-    inorder(&r);
-    preorder(&r);
+    //postorder(&r);
+    //inorder(&r);
+    //preorder(&r);
+    inorder_no_recurse(&r);
 }
