@@ -1,6 +1,6 @@
-trait Foo{
-    fn bar(&self);
-    fn foo(&self)->i32;
+#![feature(trace_macros)]
+trait Service{
+    fn bar(&self, a:i32, b:i32,);
 }
 
 struct Binding;
@@ -9,9 +9,14 @@ impl Binding{
     fn serialize(&self){println!("serialize called");}
 }
 
-macro_rules! def_impl{
+macro_rules! expand_args{
+    () => ();
+    ($arghead:ident:$head:ty) => ($arghead:$head,);
+    ($arghead:ident:$head:ty;$($argtail:ident:$tail:ty);*) => ($arghead:$head, expand_args!($($argtail:$tail);*));
+}
 
-    ($tr: ty, $(($mname:ident, $ret:ty)),+) => {
+macro_rules! def_impl{
+    ($tr: ty, $(($mname:ident, $ret:ty => $($argname:ident:$argtype:ty);*)),+) => {
         struct Proxy{
             binding : Binding
         }
@@ -24,40 +29,23 @@ macro_rules! def_impl{
             }
         }
         impl $tr for Proxy{
-            $(def_method!($ret, $mname);)* 
+            $(def_method!($ret, $mname, $($argname:$argtype);*);)* 
         }
     }
 }
 
 macro_rules! def_method{
-    ($ret : ty, $name : ident) => {
-        fn $name(&self)->$ret{
+    ($ret : ty, $name : ident, $($argname:ident:$argtype:ty);*) => {
+        fn $name(&self, expand_args!($($argname:$argtype);*);)->$ret{
 
             println!("serialization done");
             <$ret> ::default()
         }
     };
-
-    ($name : ident) => {
-        fn $name(&self){
-
-        }
-    };
 }
 
-def_impl!(Foo, (bar, ()), (foo, i32));
-//def_method!(foo);
-//def_method!(i32, bar);
-fn create_proxy()->Box<Foo>{
-    Box::new(
-        Proxy{
-            binding : Binding 
-        }
-    )
-}
+def_impl!(Service, (bar, () => a:i32;b:i32));
 
 fn main(){
-    let f : Box<Foo> = create_proxy();
-    assert!(f.bar() == ());
-    
+   trace_macros!(true) ;
 }
